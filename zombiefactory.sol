@@ -21,6 +21,7 @@ contract ZombieFeeding is ZombieFactory {
 
   KittyInterface kittyContract;
 
+  // Modify this function:
   function setKittyContractAddress(address _address) external {
     kittyContract = KittyInterface(_address);
   }
@@ -43,15 +44,3 @@ contract ZombieFeeding is ZombieFactory {
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-// pure functions - functions that don't access data within the app
-//view functions - function that reads does not alter data
