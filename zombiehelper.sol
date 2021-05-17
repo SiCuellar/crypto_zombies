@@ -4,5 +4,4 @@ import "./zombiefeeding.sol";
 
 contract ZombieHelper is ZombieFeeding {
 
-
 }
