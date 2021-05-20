@@ -29,10 +29,6 @@ contract ZombieFeeding is ZombieFactory {
     _zombie.readyTime = uint32(now + cooldownTime);
   }
 
-  function _isReady(Zombie storage _zombie) internal view returns (bool) {
-      return (_zombie.readyTime <= now);
-  }
-
   function feedAndMultiply(uint _zombieId, uint _targetDna, string memory _species) public {
     require(msg.sender == zombieToOwner[_zombieId]);
     Zombie storage myZombie = zombies[_zombieId];
@@ -42,6 +38,7 @@ contract ZombieFeeding is ZombieFactory {
       newDna = newDna - newDna % 100 + 99;
     }
     _createZombie("NoName", newDna);
+    _triggerCooldown(myZombie);
   }
 
   function feedOnKitty(uint _zombieId, uint _kittyId) public {
@@ -51,6 +48,7 @@ contract ZombieFeeding is ZombieFactory {
   }
 
 }
+
 
 
 //Storage - vairbales stored on the blockchain
