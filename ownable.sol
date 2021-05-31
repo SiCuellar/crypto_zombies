@@ -18,7 +18,6 @@ contract Ownable {
     return _owner;
   }
 
-  
   modifier onlyOwner() {
     require(isOwner());
     _;
