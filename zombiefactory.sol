@@ -1,45 +1,41 @@
 pragma solidity >=0.5.0 <0.6.0;
 
-import "./ownable.sol";
+import "./zombiefeeding.sol";
 
-contract ZombieFactory is Ownable {
+contract ZombieHelper is ZombieFeeding {
 
-    event NewZombie(uint zombieId, string name, uint dna);
+  uint levelUpFee = 0.001 ether;
 
-    uint dnaDigits = 16;
-    uint dnaModulus = 10 ** dnaDigits;
-    uint cooldownTime = 1 days;
+  modifier aboveLevel(uint _level, uint _zombieId) {
+    require(zombies[_zombieId].level >= _level);
+    _;
+  }
 
-    struct Zombie {
-      string name;
-      uint dna;
-      uint32 level;
-      uint32 readyTime;
+  function levelUp(uint _zombieId) external payable {
+    require(msg.value == levelUpFee);
+    zombies[_zombieId].level++;
+  }
+
+  function changeName(uint _zombieId, string calldata _newName) external aboveLevel(2, _zombieId) {
+    require(msg.sender == zombieToOwner[_zombieId]);
+    zombies[_zombieId].name = _newName;
+  }
+
+  function changeDna(uint _zombieId, uint _newDna) external aboveLevel(20, _zombieId) {
+    require(msg.sender == zombieToOwner[_zombieId]);
+    zombies[_zombieId].dna = _newDna;
+  }
+
+  function getZombiesByOwner(address _owner) external view returns(uint[] memory) {
+    uint[] memory result = new uint[](ownerZombieCount[_owner]);
+    uint counter = 0;
+    for (uint i = 0; i < zombies.length; i++) {
+      if (zombieToOwner[i] == _owner) {
+        result[counter] = i;
+        counter++;
+      }
     }
-
-    Zombie[] public zombies;
-
-    mapping (uint => address) public zombieToOwner;
-    mapping (address => uint) ownerZombieCount;
-
-    function _createZombie(string memory _name, uint _dna) internal {
-        uint id = zombies.push(Zombie(_name, _dna, 1, uint32(now + cooldownTime))) - 1;
-        zombieToOwner[id] = msg.sender;
-        ownerZombieCount[msg.sender]++;
-        emit NewZombie(id, _name, _dna);
-    }
-
-    function _generateRandomDna(string memory _str) private view returns (uint) {
-        uint rand = uint(keccak256(abi.encodePacked(_str)));
-        return rand % dnaModulus;
-    }
-
-    function createRandomZombie(string memory _name) public {
-        require(ownerZombieCount[msg.sender] == 0);
-        uint randDna = _generateRandomDna(_name);
-        randDna = randDna - randDna % 100;
-        _createZombie(_name, randDna);
-    }
+    return result;
+  }
 
 }
-
